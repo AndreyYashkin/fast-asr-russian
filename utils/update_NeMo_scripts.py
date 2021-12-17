@@ -7,7 +7,7 @@ commit_name = 'bump version to 1.5.1'
 commit = '01419c3492e3cb20698053a8eb861e703e61751f'
 
 
-def download(nemo, path, location='./'):
+def update(nemo, path, location='./'):
     url = nemo + path
     args = ['wget', '--backups=1', '-P', location, url]
     command = ' '.join(args)
@@ -21,13 +21,13 @@ def main():
 
     NeMo = 'https://raw.githubusercontent.com/NVIDIA/NeMo/' + args.commit + '/'
 
-    download(NeMo, 'examples/asr/speech_to_text.py')
-    download(NeMo, 'examples/asr/speech_to_text_infer.py')
-    download(NeMo, 'examples/asr/transcribe_speech.py')
-    #download(NeMo, 'examples/asr/transcribe_speech_parallel.py') # FIXME this one is faster, but is not avaliable yet in 1.5.1
+    update(NeMo, 'examples/asr/speech_to_text.py')
+    update(NeMo, 'examples/asr/speech_to_text_infer.py')
+    update(NeMo, 'examples/asr/transcribe_speech.py')
+    #update(NeMo, 'examples/asr/transcribe_speech_parallel.py') # FIXME this one is faster, but is not avaliable yet in 1.5.1
 
-    download(NeMo, 'scripts/dataset_processing/get_commonvoice_data.py', 'datasets')
-    download(NeMo, 'scripts/tokenizers/process_asr_text_tokenizer.py')
+    update(NeMo, 'scripts/dataset_processing/get_commonvoice_data.py', 'datasets')
+    update(NeMo, 'scripts/tokenizers/process_asr_text_tokenizer.py')
 
 
 if __name__ == '__main__':
