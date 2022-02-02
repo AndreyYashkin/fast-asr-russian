@@ -3,8 +3,7 @@ import subprocess
 import sys
 
 
-commit_name = 'bump version to 1.5.1'
-commit = '01419c3492e3cb20698053a8eb861e703e61751f'
+commit = '75fd7439b972a169d22a23c6c8cb948278e56ea1' # 1.6.0
 
 
 def update(nemo, path, location='./'):
@@ -16,15 +15,15 @@ def update(nemo, path, location='./'):
 
 def main():
     parser = argparse.ArgumentParser(description='Downloads necessary scripts from NeMo examples')
-    parser.add_argument('-c', '--commit', default=commit, type=str, help='From which commit (branch) you want to to download scripts. Default is commit "{}"'.format(commit_name))
+    parser.add_argument('-c', '--commit', default=commit, type=str, help='From which commit (branch) you want to to download scripts')
     args = parser.parse_args()
 
     NeMo = 'https://raw.githubusercontent.com/NVIDIA/NeMo/' + args.commit + '/'
 
-    update(NeMo, 'examples/asr/speech_to_text.py')
-    update(NeMo, 'examples/asr/speech_to_text_infer.py')
-    update(NeMo, 'examples/asr/transcribe_speech.py')
-    #update(NeMo, 'examples/asr/transcribe_speech_parallel.py') # FIXME this one is faster, but is not avaliable yet in 1.5.1
+    update(NeMo, 'examples/asr/asr_ctc/speech_to_text_ctc_bpe.py') # train
+    update(NeMo, 'examples/asr/transcribe_speech.py') # transcribe text
+    update(NeMo, 'examples/asr/transcribe_speech_parallel.py') # transcribe text faster
+    update(NeMo, 'examples/asr/speech_to_text_eval.py') # compute wer/cer
 
     update(NeMo, 'scripts/dataset_processing/get_commonvoice_data.py', 'datasets')
     update(NeMo, 'scripts/tokenizers/process_asr_text_tokenizer.py')

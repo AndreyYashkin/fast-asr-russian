@@ -1,2 +1,2 @@
 torch==1.10
-nemo-toolkit[ASR]==1.5.1
+nemo-toolkit[ASR]==1.6.0

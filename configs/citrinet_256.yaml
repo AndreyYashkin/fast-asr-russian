@@ -11,15 +11,52 @@
 # for larger models from 10x time masking to 5x or 2x time masking.
 # For further details regarding Citrinet, visit - https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/main/asr/configs.html#citrinet
 
-name: &name "Citrinet-256-8x-Stride (test on a single Quadro RTX 8000)"
+name: &name "Citrinet-256-8x-Stride-ru"
+init_from_model: ...
 
 model:
   sample_rate: &sample_rate 16000
+  num_workers: &num_workers 18
+  labels: &labels
+    - ' '
+    - а
+    - б
+    - в
+    - г
+    - д
+    - е
+    - ж
+    - з
+    - и
+    - й
+    - к
+    - л
+    - м
+    - н
+    - о
+    - п
+    - р
+    - с
+    - т
+    - у
+    - ф
+    - х
+    - ц
+    - ч
+    - ш
+    - щ
+    - ъ
+    - ы
+    - ь
+    - э
+    - ю
+    - я
 
   train_ds:
-    manifest_filepath: ???
+    manifest_filepath: /home/yashkin/golos/train/train_all_golos.jsonl
+    num_workers: *num_workers
     sample_rate: 16000
-    batch_size: 32
+    batch_size: 256
     trim_silence: false
     max_duration: 20
     min_duration: 0.1
@@ -29,16 +66,19 @@ model:
     use_start_end_token: false
 
   validation_ds:
-    manifest_filepath: ???
+    manifest_filepath:
+    - /home/yashkin/golos/test/crowd/test_crowd.jsonl
+    - /home/yashkin/golos/test/farfield/test_farfield.jsonl
+    num_workers: *num_workers
     sample_rate: 16000
-    batch_size: 32
+    batch_size: 256
     shuffle: false
     use_start_end_token: false
 
   test_ds:
     manifest_filepath: null
     sample_rate: 16000
-    batch_size: 32
+    batch_size: 256
     shuffle: false
     use_start_end_token: false
 
@@ -51,8 +91,8 @@ model:
     kernel_size_factor: 1.0
 
   tokenizer:
-    dir: ???  # path to directory which contains either tokenizer.model (bpe) or vocab.txt (for wpe)
-    type: ???  # Can be either bpe or wpe
+    dir: /media/storage/yashkin/an4/tokenizer_spe_unigram_v256  # path to directory which contains either tokenizer.model (bpe) or vocab.txt (for wpe)
+    type: bpe  # Can be either bpe or wpe
 
   preprocessor:
     _target_: nemo.collections.asr.modules.AudioToMelSpectrogramPreprocessor
@@ -367,8 +407,7 @@ model:
   decoder:
     _target_: nemo.collections.asr.modules.ConvASRDecoder
     feat_in: *enc_final
-    num_classes: -1  # filled with vocabulary size from tokenizer at runtime
-    vocabulary: []  # filled with vocabulary from tokenizer at runtime
+    num_classes: 256  # filled with vocabulary size from tokenizer at runtime
 
   optim:
     name: novograd
@@ -383,24 +422,24 @@ model:
       name: CosineAnnealing
 
       # scheduler config override
-      warmup_steps: 1000
+      warmup_steps: 2500
       warmup_ratio: null
       min_lr: 1e-5
       last_epoch: -1
 
 trainer:
   gpus: 1 # number of gpus
-  #max_epochs: 100
-  max_steps: 5000 # computed at runtime if not set
+  max_epochs: 100
+  max_steps: -1
   num_nodes: 1
-  accelerator: ddp
-  accumulate_grad_batches: 1
+  #accelerator: ddp
+  accumulate_grad_batches: 4
   checkpoint_callback: false  # Provided by exp_manager
   logger: false  # Provided by exp_manager
   log_every_n_steps: 100  # Interval of logging.
-  val_check_interval: 1.0 # Set to 0.25 to check 4 times per epoch, or an int for number of iterations
+  val_check_interval: 0.25
   check_val_every_n_epoch: 1
-  precision: 32
+  precision: 16
   sync_batchnorm: false
   benchmark: false
 
