@@ -11,12 +11,9 @@
 # for larger models from 10x time masking to 5x or 2x time masking.
 # For further details regarding Citrinet, visit - https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/main/asr/configs.html#citrinet
 
-name: &name "stt_en_citrinet_256-finetuned"
-# NOTE stt_en_citrinet_256 has num_classes=1024, while this model has 256
-# This init will work only with speech_to_text_finetune.py!
-init_from_model: nemo_experiments/stt_en_citrinet_256.nemo
-freeze_encoder: true
-enable_bn_se: true
+name: &name "Citrinet-256-8x-Stride-ru"
+#init_from_model: nemo_experiments/stt_en_citrinet_256-finetuned.nemo # FIXME
+init_from_ptl_ckpt: nemo_experiments/stt_en_citrinet_256-finetuned/2022-02-13_17-09-25/checkpoints/stt_en_citrinet_256-finetuned--val_wer=0.5804-epoch=0-last.ckpt
 
 model:
   sample_rate: &sample_rate 16000
@@ -57,7 +54,9 @@ model:
     - я
 
   train_ds:
-    manifest_filepath: /home/yashkin/golos/train/train_all_golos.jsonl
+    manifest_filepath:
+      - data/golos/train/train_all_golos.jsonl
+      - data/mcv/commonvoice_train_manifest.json
     num_workers: *num_workers
     sample_rate: 16000
     batch_size: 256
@@ -71,8 +70,9 @@ model:
 
   validation_ds:
     manifest_filepath:
-    - /home/yashkin/golos/test/crowd/test_crowd.jsonl
-    - /home/yashkin/golos/test/farfield/test_farfield.jsonl
+      - data/golos/test/crowd/test_crowd.jsonl
+      - data/golos/test/farfield/test_farfield.jsonl
+      - data/mcv/commonvoice_test_manifest.json
     num_workers: *num_workers
     sample_rate: 16000
     batch_size: 256
@@ -95,7 +95,7 @@ model:
     kernel_size_factor: 1.0
 
   tokenizer:
-    dir: /media/storage/yashkin/an4/tokenizer_spe_unigram_v256  # path to directory which contains either tokenizer.model (bpe) or vocab.txt (for wpe)
+    dir: data/an4/tokenizer_spe_unigram_v256  # path to directory which contains either tokenizer.model (bpe) or vocab.txt (for wpe)
     type: bpe  # Can be either bpe or wpe
 
   preprocessor:
@@ -419,25 +419,25 @@ model:
 
     # optimizer arguments
     betas: [0.8, 0.25]
-    weight_decay: 0.0
+    weight_decay: 0.001
 
     # scheduler setup
     sched:
       name: CosineAnnealing
 
       # scheduler config override
-      warmup_steps: 1000
+      warmup_steps: 2500
       warmup_ratio: null
       min_lr: 1e-5
       last_epoch: -1
 
 trainer:
   gpus: 1 # number of gpus
-  max_epochs: 1
+  max_epochs: 100
   max_steps: -1
   num_nodes: 1
   #accelerator: ddp
-  accumulate_grad_batches: 1
+  accumulate_grad_batches: 4
   checkpoint_callback: false  # Provided by exp_manager
   logger: false  # Provided by exp_manager
   log_every_n_steps: 100  # Interval of logging.

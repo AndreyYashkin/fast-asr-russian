@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 
-commit = '75fd7439b972a169d22a23c6c8cb948278e56ea1' # 1.6.0
+commit = '7da391634e276df7273b4da1443aa1c5b3221a32' # 1.6.2
 
 
 def update(nemo, path, location='./'):
