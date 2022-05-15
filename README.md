@@ -24,7 +24,13 @@ If you are not planing to train, then you can download Golos in opus format inst
 ```
 python3 datasets/get_commonvoice_data.py --data_root data/mcv
 ```
-If you are going to use pretrained weights then download "STT En Citrinet 256" from NVIDIA NGC.
+
+Replace "ё" symbol with "е" as it is done in Golos
+```
+sed -i 's/u0451/u0435/' data/mcv/commonvoice_dev_manifest.json
+sed -i 's/u0451/u0435/' data/mcv/commonvoice_test_manifest.json
+sed -i 's/u0451/u0435/' data/mcv/commonvoice_train_manifest.json
+```
 
 ## Training
 Create word piece tokenization
@@ -42,7 +48,8 @@ Check that it is posible to compute CTC loss for the most of samples.
 ```
 python3 ctc_loss_check.py --config-name=finetune_citrinet_256_eng
 ```
-Finetune the pretrained english model
+Finetune the pretrained english model after you download "STT En Citrinet 256" from NVIDIA NGC and
+put in `nemo_experiments/stt_en_citrinet_256.nemo`
 ```
 python3 speech_to_text_finetune.py --config-name=finetune_citrinet_256_eng
 ```
@@ -52,7 +59,16 @@ python3 speech_to_text_ctc_bpe.py --config-path=conf --config-name=citrinet_256_
 ```
 
 ## Getting metrics
-
+To compute metrics for data in `$MANIFEST_PATH`
 ```
 python speech_to_text_eval.py model_path=nemo_experiments/Citrinet-256-8x-Stride-ru/.../checkpoints/Citrinet-256-8x-Stride-ru.nemo dataset_manifest="$MANIFEST_PATH"
+```
+
+## Check mobile performance (Android)
+To convert model to format that can be used on mobile see notebook in `mobile`.
+[Follow pytorch tutorial to measure Android performance](https://pytorch.org/tutorials/recipes/mobile_perf.html).
+Make sure that you mobile torch version is built with [fft support](https://github.com/pytorch/pytorch/commit/5045c18bd1214d8bdb3dc41306da9de06868aecb)
+```
+adb push trace_c_i.ts  /data/local/tmp
+adb shell "/data/local/tmp/speed_benchmark_torch --model=/data/local/tmp/trace_c_i.ptl" --no_inputs true --iter 25
 ```
